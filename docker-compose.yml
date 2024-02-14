@@ -1,0 +1,25 @@
+version: "2.1"
+services:
+  couchdb:
+    image: couchdb:latest
+    container_name: obsidian-livesync
+    user: 1000:1000
+    env_file: couchdb.env
+    # environment:
+    #   - COUCHDB_USER=username # enter the desired CouchDB admin username
+    #   - COUCHDB_PASSWORD=password # enter the desired CouchDB admin password
+    volumes:
+      - ./data:/opt/couchdb/data
+      - ./local.ini:/opt/couchdb/etc/local.ini
+    ports:
+      - 5984:5984
+    restart: unless-stopped
+  
+  cloudflare:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    env_file: tunnel.env
+    restart: unless-stopped
+    container_name: tunnel
+    depends_on:
+      - couchdb
